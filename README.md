@@ -15,6 +15,16 @@ vector, id, label, colour, text). It proposes what to draw by, lets the user re-
 | `dist/4d.html` | 🪐 4D Face Ball: three axes, plus a category whose values are the faces of a truncated icosahedron that each record is pulled toward | **x**, **y**, **z**, **face**, face colour, colour, up to six corner weights |
 | `dist/analyzer.html` | 🔬 Analyzer: every field's distribution, statistics and outliers, correlations, and one selected record against the population | — (focus) |
 
+**An .ifc model on the 3D page** (ROAD-3598): drop or pick an `.ifc`, or open `3d.html?ifc=<url>`, and the
+page draws the model's geometry — every product's mesh, coloured by IFC class, with its edges, on the same orbit
+and six-axis fly (`src/viewers/Model3D.jsx`, `src/core/ifcModel.mjs`). Any file, ours or another tool's: the
+meshes come from web-ifc through the shared lazy loader `public/vendor/apk-webifc/apk-webifc.js`
+(WEB.Frontend-Assets `SRC/FrontEnd/shared`, copied by `.apk.scripts/vendor_shared_web.py`), web-ifc **0.0.78**,
+licence **MPL-2.0** (verified in its `package.json` and `LICENSE.md`; the files are served unmodified, as separate
+files, beside that licence). It is fetched only when an .ifc is handed over; a page drawing records never loads it.
+`node scripts/ifc-render.mjs [model.ifc] [out.png]` renders `test/fixtures/foreign-room.ifc` (IfcOpenShell-written)
+headless and checks exactly that.
+
 `dist/index.html` lists them. Any page opened with `?demo` shows a made-up data set, and with
 `?src=<url>` it fetches records itself (an array, or `{ records, schema? }`). A JSON or CSV file
 dropped on the page is read too. With none of those and no host, the page says **send data** and

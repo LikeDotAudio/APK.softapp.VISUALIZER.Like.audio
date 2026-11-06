@@ -13,12 +13,16 @@
  *   fly     → the latest six-axis frame, read by the renderer's frame loop
  *   the user picks a field → `view`; clicks a record → `pick`; picks a set → `select`
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { connectViewer, fetchData, asData } from '../core/bridge.mjs';
 import { buildModel, proposeView, missingRoles, fieldsReport, candidates } from '../core/infer.mjs';
 import { VIEWERS, VERSION } from '../core/viewers.mjs';
 import { demoRecords, DEMO_SCHEMA } from '../core/demo.mjs';
 import { parseCsv } from '../core/csv.mjs';
+import { isIfc, loadIfcModel } from '../core/ifcModel.mjs';
+
+// An .ifc on the 3D page: the model's geometry (web-ifc, fetched only then — src/core/ifcModel.mjs)
+const Model3D = lazy(() => import('../viewers/Model3D.jsx'));
 
 const ROLE_LABEL = { x: 'X', y: 'Y', z: 'Z', color: 'Colour', size: 'Size', shape: 'Shape', face: 'Face', faceGroup: 'Face colour' };
 const KIND_LABEL = { number: 'Numbers', time: 'Times', category: 'Categories', color: 'Colours' };
@@ -41,6 +45,8 @@ export default function ViewerApp({ id, Renderer }) {
   const [sel, setSel] = useState({ ids: [], pulse: false });
   const [loadError, setLoadError] = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [ifc, setIfc] = useState(null);
+  const [ifcBusy, setIfcBusy] = useState(null);
   const fly = useRef({ frame: null, at: 0 });
   const bridge = useRef(null);
   const modelRef = useRef(null);
@@ -60,7 +66,7 @@ export default function ViewerApp({ id, Renderer }) {
           const m = modelRef.current;
           if (m) b.send('fields', { fields: fieldsReport(m), view: viewRef.current, records: m.n });
         },
-        data: (m) => { setLoadError(null); setSel({ ids: [], pulse: false }); setData({ records: m.records ?? [], schema: m.schema, title: m.title }); },
+        data: (m) => { setIfc(null); setLoadError(null); setSel({ ids: [], pulse: false }); setData({ records: m.records ?? [], schema: m.schema, title: m.title }); },
         select: (m) => setSel({ ids: Array.isArray(m.ids) ? m.ids : [], pulse: !!m.pulse }),
         view: (m) => setView((v) => (modelRef.current ? sanitize(modelRef.current, def.needs, { ...v, ...(m.view ?? {}) }) : { ...v, ...(m.view ?? {}) })),
         fly: (m) => { fly.current = { frame: m, at: performance.now() }; },
@@ -69,7 +75,10 @@ export default function ViewerApp({ id, Renderer }) {
     bridge.current = b;
     // Its own host, when nobody else is: ?src=<url> or ?demo.
     const q = new URLSearchParams(location.search);
-    if (q.get('src')) fetchData(q.get('src')).then((d) => b.deliver({ type: 'data', ...d })).catch((e) => setLoadError(String(e.message ?? e)));
+    if (id === '3d' && q.get('ifc')) {
+      const src = q.get('ifc');
+      openIfc(fetch(src).then((r) => { if (!r.ok) throw new Error(`${src}: HTTP ${r.status}`); return r.arrayBuffer(); }), src.split('/').pop() || src);
+    } else if (q.get('src')) fetchData(q.get('src')).then((d) => b.deliver({ type: 'data', ...d })).catch((e) => setLoadError(String(e.message ?? e)));
     else if (q.has('demo')) b.deliver({ type: 'data', records: demoRecords(), schema: DEMO_SCHEMA, title: 'Demo — made-up stars' });
     return () => b.close();
   }, [id, def.needs]);
@@ -111,7 +120,18 @@ export default function ViewerApp({ id, Renderer }) {
     return sel.ids.map((x) => model.indexOfId(x)).filter((i) => i !== undefined);
   }, [model, sel]);
 
+  // An .ifc (3D page only): the engine is fetched now, the first time one is handed over.
+  function openIfc(bytes, name) {
+    setIfcBusy(name); setLoadError(null);
+    Promise.resolve(bytes)
+      .then((b) => loadIfcModel(new Uint8Array(b), name))
+      .then((m) => setIfc(m))
+      .catch((e) => setLoadError(`${name}: ${e.message ?? e}`))
+      .finally(() => setIfcBusy(null));
+  }
+
   const loadFile = async (file) => {
+    if (id === '3d' && isIfc(file.name)) { openIfc(file.arrayBuffer(), file.name); return; }
     try {
       const text = await file.text();
       const d = /\.csv$/i.test(file.name) || !/^\s*[[{]/.test(text) ? { records: parseCsv(text), title: file.name } : asData(JSON.parse(text), file.name);
@@ -122,18 +142,40 @@ export default function ViewerApp({ id, Renderer }) {
 
   const missing = model ? missingRoles(model, def.needs, view) : [];
   const empty = !model || model.n === 0;
+  const dropProps = {
+    onDragOver: (e) => { e.preventDefault(); setDragging(true); },
+    onDragLeave: () => setDragging(false),
+    onDrop: (e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files?.[0]; if (f) loadFile(f); },
+  };
+
+  if (ifc) {
+    return (
+      <div className="app" {...dropProps}>
+        <div className="bar">
+          <div className="title">
+            <b title={ifc.title}>🏗️ {ifc.title}</b>
+            <span>{ifc.products.toLocaleString()} products · {ifc.schema} · {Math.round(ifc.size[0]).toLocaleString()} × {Math.round(ifc.size[1]).toLocaleString()} × {Math.round(ifc.size[2]).toLocaleString()} mm · web-ifc {ifc.version}</span>
+          </div>
+          <span className="spacer" />
+          <button className="btn" onClick={() => setIfc(null)}>Close model</button>
+        </div>
+        <div className="stage">
+          <Suspense fallback={<div style={{ padding: 24, color: 'var(--muted)' }}>Loading…</div>}>
+            <Model3D model={ifc} fly={fly} />
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="app"
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files?.[0]; if (f) loadFile(f); }}>
+    <div className="app" {...dropProps}>
       {!empty && (
         <Bar def={def} model={model} view={view} changeView={changeView} title={data.title} presets={data.schema?.presets} id={id} />
       )}
       <div className="stage">
         {empty ? (
-          <Empty def={def} id={id} dragging={dragging} loadDemo={loadDemo} loadFile={loadFile} error={loadError} hadData={!!model} />
+          <Empty def={def} id={id} dragging={dragging} loadDemo={loadDemo} loadFile={loadFile} error={loadError} hadData={!!model} busy={ifcBusy} />
         ) : (
           <>
             {missing.length > 0 && <div className="notice">{tooFew(def, missing)}</div>}
@@ -209,7 +251,7 @@ export function FieldSelect({ model, kinds, value, onChange, allowNone }) {
 }
 
 /** Nobody has sent anything: say how to, and offer a file or the demo. */
-function Empty({ def, id, dragging, loadDemo, loadFile, error, hadData }) {
+function Empty({ def, id, dragging, loadDemo, loadFile, error, hadData, busy }) {
   const input = useRef(null);
   return (
     <div className={`empty${dragging ? ' drop' : ''}`}>
@@ -223,13 +265,15 @@ function Empty({ def, id, dragging, loadDemo, loadFile, error, hadData }) {
   records: [{ name: 'A', mass: 1.2, kind: 'red' }, …],
 }, '*');`}</pre>
         <p>Or open it with <code>?src=&lt;url of a JSON array&gt;</code>, or drop a JSON or CSV file here. The contract is <code>contract/host@1/</code>.</p>
+        {id === '3d' && <p>An <b>.ifc</b> model (ours or any other tool's) dropped here, or <code>?ifc=&lt;url&gt;</code>, is drawn as its geometry.</p>}
+        {busy && <p style={{ color: 'var(--muted)' }}>Reading {busy} with web-ifc…</p>}
         {error && <p style={{ color: 'var(--warn)' }}>{error}</p>}
         <div className="actions">
           <button className="btn" onClick={() => input.current?.click()}>Open a file…</button>
           <button className="btn" onClick={loadDemo}>Show the demo</button>
           {id !== 'index' && <span style={{ color: 'var(--muted)', alignSelf: 'center' }}>Waiting for a host…</span>}
         </div>
-        <input ref={input} type="file" accept=".json,.csv,application/json,text/csv" hidden
+        <input ref={input} type="file" accept={id === '3d' ? '.json,.csv,.ifc,application/json,text/csv' : '.json,.csv,application/json,text/csv'} hidden
           onChange={(e) => { const f = e.target.files?.[0]; if (f) loadFile(f); e.target.value = ''; }} />
       </div>
     </div>
