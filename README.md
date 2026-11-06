@@ -133,3 +133,7 @@ stayed in Scanalyzer, which is a host now.
 
 ## 📚 Wiki
 Principles, architecture and delivery: [Documentation/README.md](Documentation/README.md).
+
+<!-- wiki:smoke -->
+**Smoke test** — ✅ PASS 2/2 since 2026-11-06 10:16 EST — [results](Documentation/%F0%9F%A7%A9Manual%20and%20Artifacts/SMOKE.md)
+<!-- /wiki:smoke -->
