@@ -1,0 +1,27 @@
+{
+  "name": "visualizer-like-audio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "VISUALIZER.Like.audio — 2D, 3D, 4D (Face Ball) and Analyzer viewers that look at whatever records they are handed, over viz.like.audio/host@1.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm test && vite build",
+    "preview": "vite preview",
+    "test": "node --test test/*.test.mjs && node contract/validate.mjs",
+    "contract": "python3 scripts/write-contract.py && node contract/validate.mjs",
+    "shots": "node scripts/screenshots.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.7",
+    "@react-three/fiber": "9.6.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.3",
+    "vite": "8.1.4"
+  }
+}
