@@ -82,3 +82,10 @@ select { max-width: 180px; }
 .pill { display: inline-block; margin: 0 4px 4px 0; padding: 2px 6px; border-radius: 10px; background: #1e2738; cursor: pointer; font-size: 11px; }
 .pill:hover { background: #26324a; }
 .rec .b { cursor: default; }
+/* A narrow frame (a host's side column): one column, the selected record and the focused field first, the field list after. */
+@media (max-width: 720px) {
+  .an { grid-template-columns: 1fr; grid-template-rows: auto; overflow: auto; height: 100%; }
+  .an .detail { order: 1; overflow: visible; padding: 8px; }
+  .an .list { order: 2; overflow: visible; border-right: none; border-top: 1px solid var(--border); }
+  .bar .title b { max-width: 160px; }
+}

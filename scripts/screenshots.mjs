@@ -82,6 +82,22 @@ try {
     }
     await new Promise((r) => setTimeout(r, 1200));
     await page.screenshot({ path: join(OUT, `${v}.png`) });
+    if (v === '3d' || v === '4d') {
+      // Fly: frames move the camera, and when they stop the camera stops (FLY_STALE_MS), never runs on.
+      const shot = () => page.screenshot({ encoding: 'base64' });
+      const before = await shot();
+      await page.evaluate(async () => {
+        for (let k = 0; k < 25; k++) { window.send({ protocol: 'viz.like.audio/host@1', type: 'fly', x: 0, y: 0, z: 0, yaw: 1, pitch: 0, roll: 0 }); await new Promise((r) => setTimeout(r, 30)); }
+      });
+      const during = await shot();
+      await new Promise((r) => setTimeout(r, 400));
+      const settled = await shot();
+      await new Promise((r) => setTimeout(r, 900));
+      const later = await shot();
+      const moved = before !== during, stopped = settled === later;
+      console.log(`  fly: camera moved ${moved}, stopped after frames stopped ${stopped}`);
+      if (!moved || !stopped) bad++;
+    }
     const got = await page.evaluate(() => got);
     console.log(`${v}: ${got.map((m) => m.type).join(', ')}`);
     for (const m of got) {

@@ -176,7 +176,7 @@ function Points({ model, view, selected, pulse, onPick, onHover, layout }) {
 // beat and a 144 Hz redraw fly at the same speed.
 const FLY_DOLLY = 18, FLY_TRUCK = 14, FLY_ORBIT = 1.6, FLY_ROLL = 1.2, FLY_DEAD = 0.002;
 /** A frame older than this is not flown: the host stopped sending, so the hand is not there. */
-export const FLY_STALE_MS = 600;
+export const FLY_STALE_MS = 200;
 
 export function Fly({ fly }) {
   const { camera, controls } = useThree();

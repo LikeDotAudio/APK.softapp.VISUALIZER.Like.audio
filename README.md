@@ -59,6 +59,54 @@ addEventListener('message', (e) => {
 });
 ```
 
+### Hosts today
+
+- **SCANALYZER.Like.audio.** Its 3D tab frames `3d.html`, its 4D tab `4d.html`, its 2D tab
+  `2d.html`, and the Examiner frames `analyzer.html` in its right column. It sends one flat record
+  per sample. Its own code says what a sample is (`CloudTab/cloudRecords.ts`,
+  `FaceBallTab/faceRecords.ts`); the viewers are not told.
+- **The BIM library browser** (DATABASE.server.BIM, :8160). This is the sequence for its
+  🌐 2D / 🧊 3D / 🪐 4D / 🔬 Analyzer lenses, below.
+
+### The BIM library browser's lenses: URL and messages
+
+The viewers are served from the Softapps tree, at
+`http://<bench>:8080/APK:Softapps/VISUALIZER/VISUALIZER.Like.audio/dist/<page>.html`, where `<page>`
+is `2d`, `3d`, `4d` or `analyzer`. On a static site, use the same path under the site root. The
+browser on :8160 frames that URL in an iframe. That works across origins: `ready` goes to `'*'`,
+and the viewer then answers to whatever origin sent it `data`.
+
+```
+viewer → browser   { protocol:'viz.like.audio/host@1', type:'ready', viewer:'3d', version, needs:[…] }
+browser → viewer   { protocol:'viz.like.audio/host@1', type:'data',
+                     title:'BIM library — <query>',
+                     records: <the parts of the current search: GET /api/bim/search … .parts, every page wanted>,
+                     schema: { id:'id', label:'name',
+                               view:{ x:'ports.length', y:'ports[].count Σ', z:'category', color:'category' } } }
+viewer → browser   { type:'fields', records:N, fields:[{name,kind,count,…}], view:{…} }   (what it read)
+  …the user looks around…
+viewer → browser   { type:'pick',   id:'<part id>', index }         → open that part
+viewer → browser   { type:'select', ids:['<part id>', …], reason }  → e.g. narrow the list to them
+viewer → browser   { type:'view',   view:{…} }                      → remember the lens's axes
+browser → viewer   { type:'select', ids:['<part id>'] }              when the list's selection changes
+browser → viewer   { type:'data', … }                                again whenever the search changes
+```
+
+`schema` is optional. Without it the viewer still reads parts on its own: `id` as the id, `name`
+as the label, and `category`, `class`, `maker` and `stage` as categories. It reads `ports` (a list
+of objects) as `ports.length` and `ports[].count Σ`. It proposes axes from those. All 7,424 parts
+were drawn this way in headless Chrome (`npm run shots -- <dir> bim.json`). A lens should send
+the records it has already fetched, not ask the viewer to fetch them. `?src=<url>` exists for
+pages that have no host.
+
+### Growing it without breaking it
+
+A receiver ignores a message type it does not know, and a field it does not know. So a new
+viewer page and a new `toViewer` message are additions within @1. Examples are a `model.html`
+viewer and an optional `toViewer.model` for IFC, as the IFC plan's viewers-plumbing-4 proposes.
+In that case `viewer` gains a value, and `pick`/`select` ids, which are already strings or
+numbers, carry GlobalIds. Renaming or removing anything is @2.
+
 ## Why one repository and not four
 
 The four viewers share the contract, the inference (`src/core/infer.mjs`), the scales (so a field
