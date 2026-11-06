@@ -27,7 +27,8 @@ defs = {
       "kind": ref("kind"), "label": s("Display name; the field's own name otherwise."), "unit": s(),
       "order": {"description": "category: the values in the order to lay them out (and, on the 4D ball, the order faces are dealt). Values not listed follow, sorted.", "type": "array", "items": {"type": "string"}},
       "colors": {"description": "category: a CSS colour per value. Values not listed take the viewer's palette.", "type": "object", "additionalProperties": {"type": "string"}},
-      "hidden": {"description": "Never offered as an axis or colour (it still shows on hover and in the Analyzer).", "type": "boolean"}}},
+      "hidden": {"description": "Never offered as an axis or colour (it still shows on hover and in the Analyzer).", "type": "boolean"},
+      "group": s("A heading the field is listed under in the pickers (Time, Frequency, …). Ungrouped fields are listed by kind.")}},
   "view": {"description": "What the viewer is drawing by: field names per role (null = none). Each viewer reads the roles it has and ignores the rest. Sent both ways: the host proposes, the viewer reports what the user picked.", "type": "object", "properties": {
       "x": fieldOrNull, "y": fieldOrNull, "z": fieldOrNull, "color": fieldOrNull, "size": fieldOrNull, "shape": fieldOrNull,
       "face": {"description": "4d: the category whose values are the ball's faces (up to 32; the rest share the last face).", "anyOf": [{"type": "string"}, {"type": "null"}]},

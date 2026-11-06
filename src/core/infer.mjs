@@ -183,6 +183,7 @@ export function buildModel(records, hint = {}) {
     const f = { name, kind, label: h.label ?? name };
     if (h.unit) f.unit = h.unit;
     if (h.hidden) f.hidden = true;
+    if (h.group) f.group = String(h.group);
     if (kind === 'number' || kind === 'time') Object.assign(f, numericSummary(col));
     else if (kind === 'vector') {
       const lens = col.filter(Boolean).map((v) => v.length);

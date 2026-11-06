@@ -1,49 +1,251 @@
 {
   "$comment": "One sample of every viz.like.audio/host@1 message, both directions. The records are deliberately nobody's dataset: a few made-up things with numbers, a category, a date and a three-number vector. Both sides test against these: VISUALIZER.Like.audio (test/contract.test.mjs) and every host that vendors this directory.",
   "toViewer": [
-    { "protocol": "viz.like.audio/host@1", "type": "hello" },
     {
-      "protocol": "viz.like.audio/host@1", "type": "data", "title": "Things",
+      "protocol": "viz.like.audio/host@1",
+      "type": "hello"
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "data",
+      "title": "Things",
       "records": [
-        { "id": "a1", "name": "First", "kind": "red", "mass": 1.2, "size": { "w": 10, "h": 4 }, "made": "2026-01-05", "embed": [0.1, 0.4, 0.9] },
-        { "id": "a2", "name": "Second", "kind": "blue", "mass": 3.4, "size": { "w": 12, "h": 6 }, "made": "2026-02-11", "embed": [0.3, 0.2, 0.5] },
-        { "id": "a3", "name": "Third", "kind": "red", "mass": 2.0, "size": { "w": 8, "h": 9 }, "made": "2026-03-20", "embed": [0.8, 0.1, 0.2] }
+        {
+          "id": "a1",
+          "name": "First",
+          "kind": "red",
+          "mass": 1.2,
+          "size": {
+            "w": 10,
+            "h": 4
+          },
+          "made": "2026-01-05",
+          "embed": [
+            0.1,
+            0.4,
+            0.9
+          ]
+        },
+        {
+          "id": "a2",
+          "name": "Second",
+          "kind": "blue",
+          "mass": 3.4,
+          "size": {
+            "w": 12,
+            "h": 6
+          },
+          "made": "2026-02-11",
+          "embed": [
+            0.3,
+            0.2,
+            0.5
+          ]
+        },
+        {
+          "id": "a3",
+          "name": "Third",
+          "kind": "red",
+          "mass": 2.0,
+          "size": {
+            "w": 8,
+            "h": 9
+          },
+          "made": "2026-03-20",
+          "embed": [
+            0.8,
+            0.1,
+            0.2
+          ]
+        }
       ],
       "schema": {
-        "id": "id", "label": "name",
-        "fields": { "mass": { "unit": "kg" }, "kind": { "order": ["red", "blue"], "colors": { "red": "#e5484d", "blue": "#3e63dd" } } },
-        "view": { "x": "mass", "y": "size.w", "z": "size.h", "color": "kind" },
-        "presets": [ { "key": "A", "name": "Mass against width", "view": { "x": "mass", "y": "size.w" } } ]
+        "id": "id",
+        "label": "name",
+        "fields": {
+          "mass": {
+            "unit": "kg",
+            "group": "Physical"
+          },
+          "kind": {
+            "order": [
+              "red",
+              "blue"
+            ],
+            "colors": {
+              "red": "#e5484d",
+              "blue": "#3e63dd"
+            }
+          }
+        },
+        "view": {
+          "x": "mass",
+          "y": "size.w",
+          "z": "size.h",
+          "color": "kind"
+        },
+        "presets": [
+          {
+            "key": "A",
+            "name": "Mass against width",
+            "view": {
+              "x": "mass",
+              "y": "size.w"
+            }
+          }
+        ]
       }
     },
-    { "protocol": "viz.like.audio/host@1", "type": "select", "ids": ["a2"], "pulse": true },
-    { "protocol": "viz.like.audio/host@1", "type": "view", "view": { "x": "size.h", "signs": [1, -1, 1] } },
-    { "protocol": "viz.like.audio/host@1", "type": "fly", "x": 0, "y": 0.4, "z": 0, "yaw": -0.1, "pitch": 0, "roll": 0 }
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "select",
+      "ids": [
+        "a2"
+      ],
+      "pulse": true
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "view",
+      "view": {
+        "x": "size.h",
+        "signs": [
+          1,
+          -1,
+          1
+        ]
+      }
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "fly",
+      "x": 0,
+      "y": 0.4,
+      "z": 0,
+      "yaw": -0.1,
+      "pitch": 0,
+      "roll": 0
+    }
   ],
   "toHost": [
     {
-      "protocol": "viz.like.audio/host@1", "type": "ready", "viewer": "3d", "version": "1.0.0",
+      "protocol": "viz.like.audio/host@1",
+      "type": "ready",
+      "viewer": "3d",
+      "version": "1.0.0",
       "needs": [
-        { "role": "x", "kinds": ["number", "time", "category"], "required": true },
-        { "role": "y", "kinds": ["number", "time", "category"], "required": true },
-        { "role": "z", "kinds": ["number", "time", "category"], "required": true },
-        { "role": "color", "kinds": ["category", "number", "color"] },
-        { "role": "size", "kinds": ["number"] },
-        { "role": "shape", "kinds": ["category"] }
+        {
+          "role": "x",
+          "kinds": [
+            "number",
+            "time",
+            "category"
+          ],
+          "required": true
+        },
+        {
+          "role": "y",
+          "kinds": [
+            "number",
+            "time",
+            "category"
+          ],
+          "required": true
+        },
+        {
+          "role": "z",
+          "kinds": [
+            "number",
+            "time",
+            "category"
+          ],
+          "required": true
+        },
+        {
+          "role": "color",
+          "kinds": [
+            "category",
+            "number",
+            "color"
+          ]
+        },
+        {
+          "role": "size",
+          "kinds": [
+            "number"
+          ]
+        },
+        {
+          "role": "shape",
+          "kinds": [
+            "category"
+          ]
+        }
       ]
     },
     {
-      "protocol": "viz.like.audio/host@1", "type": "fields", "records": 3,
+      "protocol": "viz.like.audio/host@1",
+      "type": "fields",
+      "records": 3,
       "fields": [
-        { "name": "id", "kind": "id", "count": 3, "distinct": 3 },
-        { "name": "mass", "kind": "number", "count": 3, "distinct": 3, "min": 1.2, "max": 3.4 },
-        { "name": "embed", "kind": "vector", "count": 3, "dims": 3 }
+        {
+          "name": "id",
+          "kind": "id",
+          "count": 3,
+          "distinct": 3
+        },
+        {
+          "name": "mass",
+          "kind": "number",
+          "count": 3,
+          "distinct": 3,
+          "min": 1.2,
+          "max": 3.4
+        },
+        {
+          "name": "embed",
+          "kind": "vector",
+          "count": 3,
+          "dims": 3
+        }
       ],
-      "view": { "x": "mass", "y": "size.w", "z": "size.h", "color": "kind", "size": null, "shape": null }
+      "view": {
+        "x": "mass",
+        "y": "size.w",
+        "z": "size.h",
+        "color": "kind",
+        "size": null,
+        "shape": null
+      }
     },
-    { "protocol": "viz.like.audio/host@1", "type": "pick", "id": "a3", "index": 2 },
-    { "protocol": "viz.like.audio/host@1", "type": "select", "ids": ["a1", "a3"], "reason": "kind = red" },
-    { "protocol": "viz.like.audio/host@1", "type": "view", "view": { "x": "mass", "y": "made" } },
-    { "protocol": "viz.like.audio/host@1", "type": "error", "code": "too-few-fields", "message": "3D needs three fields it can place along an axis; these records have two." }
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "pick",
+      "id": "a3",
+      "index": 2
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "select",
+      "ids": [
+        "a1",
+        "a3"
+      ],
+      "reason": "kind = red"
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "view",
+      "view": {
+        "x": "mass",
+        "y": "made"
+      }
+    },
+    {
+      "protocol": "viz.like.audio/host@1",
+      "type": "error",
+      "code": "too-few-fields",
+      "message": "3D needs three fields it can place along an axis; these records have two."
+    }
   ]
 }

@@ -153,3 +153,8 @@ test('a category that only relabels another is not a second axis; numbers come b
   assert.deepEqual(missingRoles(m2, VIEWERS['3d'].needs, v2), []);
   assert.ok([v2.x, v2.y, v2.z].includes('cat'));
 });
+
+test('a group hint is carried to the field (the pickers list by it)', () => {
+  const m = buildModel([{ a: 1 }, { a: 2 }], { fields: { a: { group: 'Time' } } });
+  assert.equal(m.field('a').group, 'Time');
+});

@@ -50,6 +50,10 @@
         "hidden": {
           "description": "Never offered as an axis or colour (it still shows on hover and in the Analyzer).",
           "type": "boolean"
+        },
+        "group": {
+          "type": "string",
+          "description": "A heading the field is listed under in the pickers (Time, Frequency, …). Ungrouped fields are listed by kind."
         }
       }
     },

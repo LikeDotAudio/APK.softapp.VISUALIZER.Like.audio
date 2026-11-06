@@ -192,12 +192,15 @@ function Bar({ def, model, view, changeView, title, presets, id }) {
 }
 
 export function FieldSelect({ model, kinds, value, onChange, allowNone }) {
-  const groups = kinds.map((k) => [k, candidates(model, [k])]).filter(([, fs]) => fs.length);
+  // The host's headings first (a field's `group` hint), then the rest by kind.
+  const all = candidates(model, kinds);
+  const named = [...new Set(all.filter((f) => f.group).map((f) => f.group))].map((g) => [g, all.filter((f) => f.group === g)]);
+  const groups = [...named, ...kinds.map((k) => [KIND_LABEL[k] ?? k, all.filter((f) => !f.group && f.kind === k)])].filter(([, fs]) => fs.length);
   return (
     <select value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
       {(allowNone || !value) && <option value="">— none —</option>}
       {groups.map(([k, fs]) => (
-        <optgroup key={k} label={KIND_LABEL[k] ?? k}>
+        <optgroup key={k} label={k}>
           {fs.map((f) => <option key={f.name} value={f.name}>{f.label}{f.unit ? ` (${f.unit})` : ''}</option>)}
         </optgroup>
       ))}

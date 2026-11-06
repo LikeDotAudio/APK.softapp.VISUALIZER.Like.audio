@@ -84,8 +84,13 @@ select { max-width: 180px; }
 .rec .b { cursor: default; }
 /* A narrow frame (a host's side column): one column, the selected record and the focused field first, the field list after. */
 @media (max-width: 720px) {
-  .an { grid-template-columns: 1fr; grid-template-rows: auto; overflow: auto; height: 100%; }
+  .an { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; overflow: auto; height: 100%; }
+  .stats { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
   .an .detail { order: 1; overflow: visible; padding: 8px; }
   .an .list { order: 2; overflow: visible; border-right: none; border-top: 1px solid var(--border); }
   .bar .title b { max-width: 160px; }
+}
+/* A short frame: the content gets the height, not the title bar. */
+@media (max-height: 240px) {
+  .app > .bar { display: none; }
 }
